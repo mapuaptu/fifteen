@@ -30,10 +30,17 @@
       <div
         v-for="item in items"
         :key="item"
-        class="item"
+        :class="['item', !item && 'item--hided']"
       >
         {{ item }}
       </div>
+    </div>
+
+    <div
+      class="shuffle"
+      @click="shuffleItems"
+    >
+      shuffle
     </div>
   </div>
 </template>
@@ -41,13 +48,19 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
+const shuffle = (array: number[]):number[] => array.sort(() => Math.random() - 0.5);
+
 export default defineComponent({
   name: 'App',
   components: {},
   setup() {
-    const items = ref(Array.from(Array(15), (item, index) => index + 1));
+    const items = ref(shuffle(Array.from(Array(16), (item, index) => index)));
 
-    return { items };
+    const shuffleItems = () => {
+      items.value = shuffle(items.value);
+    };
+
+    return { items, shuffleItems };
   },
 });
 </script>
@@ -128,7 +141,18 @@ export default defineComponent({
         background-color: var(--main-color);
         color: #000;
       }
+
+      &--hided {
+        display: none;
+      }
     }
+  }
+
+  .shuffle {
+    margin-top: 50px;
+    width: 100px;
+    height: 100px;
+    background-color: var(--main-color);
   }
 }
 </style>
