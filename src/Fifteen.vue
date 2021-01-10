@@ -8,7 +8,7 @@
       <div class="right">
         <div class="block">
           <div class="title">
-            Ходов
+            Steps
           </div>
           <div class="value">
             {{ step }}
@@ -17,7 +17,7 @@
 
         <div class="block">
           <div class="title">
-            Время
+            Time
           </div>
           <div class="value">
             {{ formatTimer }}
@@ -38,34 +38,6 @@
         </div>
       </transition-group>
     </div>
-
-    <div
-      class="shuffle"
-      @click="shuffleItems"
-    >
-      shuffle
-    </div>
-
-    <div
-      class="shuffle"
-      @click="stopTimer"
-    >
-      stopTimer
-    </div>
-
-    <div
-      class="shuffle"
-      @click="startTimer"
-    >
-      startTimer
-    </div>
-
-    <div
-      class="shuffle"
-      @click="resetTimer"
-    >
-      resetTimer
-    </div>
   </div>
 </template>
 
@@ -77,7 +49,9 @@ import {
   onMounted,
 } from 'vue';
 
-const shuffle = (array: number[]): number[] => array.sort(() => Math.random() - 0.5);
+// All functions don't mutate parameters, and return new arrays
+
+const shuffle = (arr: number[]): number[] => [...arr].sort(() => Math.random() - 0.5);
 const swap = (first: number, last: number, arr: number[]): number[] => {
   const newArray = [...arr];
 
@@ -112,22 +86,29 @@ const canMove = (current: number, arr: number[]) => {
   return [zeroIndex - 1, zeroIndex - 4, zeroIndex + 1, zeroIndex + 4].includes(current);
 };
 
+const arraysEqual = (arr1: number[], arr2: number[]) => {
+  const newArr1 = [...arr1];
+  const newArr2 = [...arr2];
+
+  return newArr1.length === newArr2.length && newArr1.every((el, index) => el === newArr2[index]);
+};
+
 export default defineComponent({
-  name: 'App',
+  name: 'Fifteen',
   components: {},
   setup() {
-    const items = ref(shuffle(Array.from(Array(16), (item, index) => index)));
-    const step = ref(0);
+    // Initialize
 
+    const initial = [...Array.from(Array(15), (item, index) => index + 1), 0];
+    const items = ref(shuffle(initial));
     const shuffleItems = () => {
       items.value = shuffle(items.value);
     };
 
-    const moveItem = (index: number) => {
-      if (canMove(index, items.value)) {
-        step.value += 1;
-        items.value = swap(items.value.indexOf(0), index, items.value);
-      }
+    // Step
+    const step = ref(0);
+    const resetStep = () => {
+      step.value = 0;
     };
 
     // Timer
@@ -150,6 +131,28 @@ export default defineComponent({
     };
 
     onMounted(() => startTimer());
+
+    // Move
+
+    const moveItem = (index: number) => {
+      if (canMove(index, items.value)) {
+        step.value += 1;
+        items.value = swap(items.value.indexOf(0), index, items.value);
+      }
+
+      if (arraysEqual(initial, items.value)) {
+        stopTimer();
+
+        window.alert(
+          `You win! Time: ${formatTimer.value}, Steps: ${step.value}. Play again?`,
+        );
+
+        resetTimer();
+        resetStep();
+        shuffleItems();
+        startTimer();
+      }
+    };
 
     return {
       items,
