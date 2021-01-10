@@ -98,6 +98,19 @@ const formatTime = (sec: number): string => {
 
   return `${minutesString}:${secondsString}`;
 };
+const canMove = (current: number, arr: number[]) => {
+  const zeroIndex = arr.indexOf(0);
+
+  if (zeroIndex % 4 === 0) {
+    return [zeroIndex - 4, zeroIndex + 1, zeroIndex + 4].includes(current);
+  }
+
+  if (zeroIndex % 4 === 3) {
+    return [zeroIndex - 1, zeroIndex - 4, zeroIndex + 4].includes(current);
+  }
+
+  return [zeroIndex - 1, zeroIndex - 4, zeroIndex + 1, zeroIndex + 4].includes(current);
+};
 
 export default defineComponent({
   name: 'App',
@@ -111,8 +124,10 @@ export default defineComponent({
     };
 
     const moveItem = (index: number) => {
-      step.value += 1;
-      items.value = swap(items.value.indexOf(0), index, items.value);
+      if (canMove(index, items.value)) {
+        step.value += 1;
+        items.value = swap(items.value.indexOf(0), index, items.value);
+      }
     };
 
     // Timer
@@ -125,6 +140,7 @@ export default defineComponent({
     const resetTimer = () => {
       timer.value = 0;
     };
+
     let timerInterval: number;
     const startTimer = () => {
       timerInterval = setInterval(updateTimer, 1000);
