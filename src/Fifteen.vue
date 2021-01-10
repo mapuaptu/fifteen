@@ -11,7 +11,7 @@
             Ходов
           </div>
           <div class="value">
-            0
+            {{ step }}
           </div>
         </div>
 
@@ -20,20 +20,23 @@
             Время
           </div>
           <div class="value">
-            0
+            {{ formatTimer }}
           </div>
         </div>
       </div>
     </div>
 
     <div class="field">
-      <div
-        v-for="item in items"
-        :key="item"
-        :class="['item', !item && 'item--hided']"
-      >
-        {{ item }}
-      </div>
+      <transition-group>
+        <div
+          v-for="(item, index) in items"
+          :key="item"
+          :class="['item', !item && 'item--hided']"
+          @click="moveItem(index)"
+        >
+          {{ item }}
+        </div>
+      </transition-group>
     </div>
 
     <div
@@ -42,25 +45,106 @@
     >
       shuffle
     </div>
+
+    <div
+      class="shuffle"
+      @click="stopTimer"
+    >
+      stopTimer
+    </div>
+
+    <div
+      class="shuffle"
+      @click="startTimer"
+    >
+      startTimer
+    </div>
+
+    <div
+      class="shuffle"
+      @click="resetTimer"
+    >
+      resetTimer
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {
+  defineComponent,
+  ref,
+  computed,
+  onMounted,
+} from 'vue';
 
-const shuffle = (array: number[]):number[] => array.sort(() => Math.random() - 0.5);
+const shuffle = (array: number[]): number[] => array.sort(() => Math.random() - 0.5);
+const swap = (first: number, last: number, arr: number[]): number[] => {
+  const newArray = [...arr];
+
+  const b = newArray[first];
+
+  newArray[first] = newArray[last];
+
+  newArray[last] = b;
+
+  return newArray;
+};
+const formatTime = (sec: number): string => {
+  const minutes = Math.floor(sec / 60);
+  const seconds = sec - minutes * 60;
+
+  const minutesString = minutes < 10 ? `0${minutes}` : minutes;
+  const secondsString = seconds < 10 ? `0${seconds}` : seconds;
+
+  return `${minutesString}:${secondsString}`;
+};
 
 export default defineComponent({
   name: 'App',
   components: {},
   setup() {
     const items = ref(shuffle(Array.from(Array(16), (item, index) => index)));
+    const step = ref(0);
 
     const shuffleItems = () => {
       items.value = shuffle(items.value);
     };
 
-    return { items, shuffleItems };
+    const moveItem = (index: number) => {
+      step.value += 1;
+      items.value = swap(items.value.indexOf(0), index, items.value);
+    };
+
+    // Timer
+
+    const timer = ref(0);
+    const formatTimer = computed(() => formatTime(timer.value));
+    const updateTimer = () => {
+      timer.value += 1;
+    };
+    const resetTimer = () => {
+      timer.value = 0;
+    };
+    let timerInterval: number;
+    const startTimer = () => {
+      timerInterval = setInterval(updateTimer, 1000);
+    };
+    const stopTimer = () => {
+      clearInterval(timerInterval);
+    };
+
+    onMounted(() => startTimer());
+
+    return {
+      items,
+      shuffleItems,
+      moveItem,
+      step,
+      formatTimer,
+      stopTimer,
+      resetTimer,
+      startTimer,
+    };
   },
 });
 </script>
@@ -143,7 +227,7 @@ export default defineComponent({
       }
 
       &--hided {
-        display: none;
+        visibility: hidden;
       }
     }
   }
