@@ -1,6 +1,31 @@
 <template>
   <div class="fifteen">
-    <div>{{ myValue }}</div>
+    <div class="controls">
+      <div class="name">
+        15
+      </div>
+
+      <div class="right">
+        <div class="block">
+          <div class="title">
+            Ходов
+          </div>
+          <div class="value">
+            0
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="title">
+            Время
+          </div>
+          <div class="value">
+            0
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="field">
       <div
         v-for="item in items"
@@ -31,6 +56,50 @@ export default defineComponent({
 .fifteen {
 --main-color: rgb(11, 159, 245);
 --radius: 5px;
+
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-right: 15px;
+    padding-left: 20px;
+
+    .name {
+      font-size: 70px;
+      color: var(--main-color);
+    }
+
+    .right {
+      display: flex;
+    }
+
+    .block {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-flow: column;
+      border-radius: var(--radius);
+      width: 100px;
+      border: 5px var(--main-color) solid;
+      border-radius: var(--radius);
+      box-shadow: 2px 2px 20px var(--main-color) inset;
+
+      &:first-child {
+        margin-right: 5px;
+      }
+
+      .title {
+        margin-bottom: 5px;
+        font-size: 20px;
+        color: var(--main-color);
+      }
+
+      .value {
+        font-size: 15px;
+        color: var(--main-color);
+      }
+    }
+  }
 
   .field {
     display: grid;
